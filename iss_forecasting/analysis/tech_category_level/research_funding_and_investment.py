@@ -62,17 +62,16 @@ iss_ts.tech_category.unique()
 #
 # `'EEM'` (energy efficiency and management) includes:
 # - `'Insulation & retrofit'`
+
 # - `'Energy management'` -- this includes companies working on things like smart homes, smart meters, demand response and load shifting
 #
 # Note that some companies in this dataset can belong to more than one technology category.
-
 # %%
 # check for tech categories with no investment
 categories_with_no_investment = find_zero_items(
     df=iss_ts, item_col="tech_category", value_col="investment_raised_total"
 )
 categories_with_no_investment
-
 # %%
 # remove tech categories with no investment from time series data
 iss_ts = iss_ts.query(f"tech_category != {categories_with_no_investment}").reset_index(
@@ -120,3 +119,8 @@ for tech_cat in tech_cats:
     )
 
 plots_ts
+<<<<<<< HEAD
+=======
+
+# %%
+>>>>>>> 50ce48f (Remove conflict indicators)
