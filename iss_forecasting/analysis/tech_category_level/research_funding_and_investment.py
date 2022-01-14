@@ -59,8 +59,10 @@ iss_ts.tech_category.unique()
 # %% [markdown]
 # Note that some of the technology categories include other tech categories.<br>
 # `'Low carbon heating'` includes:
-# - `'Solar'`
-# - `'District heating'`
+# - `'Heat pumps'`
+# - `'Geothermal energy'` -- filtered out in this analysis as no investment
+# - `'Solar thermal'` -- there is `Solar` and `Solar thermal`, difference?
+# - `'District heating'` -- filtered out in this analysis as no investment
 # - `'Hydrogen heating'`
 # - `'Biomass heating'`
 # - `'Micro CHP'`
@@ -68,8 +70,9 @@ iss_ts.tech_category.unique()
 #
 # `'EEM'` (energy efficiency and management) includes:
 # - `'Insulation & retrofit'`
-# - `'Smart homes'` -- missing individually in this time series data?
-# - `'Smart meters'` -- missing individually in this time series data?
-# - `'Load shifting'` -- missing individually in this time series data?
+# - `'Smart homes'` -- missing individually in this time series data? included in 'Energy management'? Is 'Energy management' included in 'EEM'? It doesn't look like it as 'Energy management' has higher values than 'EEM' in 2007..?
+# - `'Smart meters'` -- missing individually in this time series data? included in 'Energy management'?
+# - `'Demand response'` -- missing individually in this time series data? included in 'Energy management'?
+# - `'Load shifting'` -- missing individually in this time series data? included in 'Energy management'?
 
 # %%
