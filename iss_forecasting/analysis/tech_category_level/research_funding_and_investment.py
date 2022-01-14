@@ -14,6 +14,9 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# ## Exploring the relationship between research funding and private investment
+
 # %%
 from iss_forecasting.getters.iss_green_pilot_ts import get_iss_green_pilot_time_series
 from iss_forecasting.utils.processing import find_zero_items
