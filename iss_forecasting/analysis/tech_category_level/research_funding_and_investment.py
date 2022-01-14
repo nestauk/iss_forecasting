@@ -62,7 +62,6 @@ iss_ts.tech_category.unique()
 #
 # `'EEM'` (energy efficiency and management) includes:
 # - `'Insulation & retrofit'`
-
 # - `'Energy management'` -- this includes companies working on things like smart homes, smart meters, demand response and load shifting
 #
 # Note that some companies in this dataset can belong to more than one technology category.
@@ -119,8 +118,3 @@ for tech_cat in tech_cats:
     )
 
 plots_ts
-<<<<<<< HEAD
-=======
-
-# %%
->>>>>>> 50ce48f (Remove conflict indicators)
