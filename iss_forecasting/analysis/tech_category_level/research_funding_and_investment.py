@@ -50,7 +50,9 @@ categories_with_no_investment
 
 # %%
 # remove tech categories with no investment from time series data
-iss_ts = iss_ts.query(f"tech_category != {categories_with_no_investment}").reset_index()
+iss_ts = iss_ts.query(f"tech_category != {categories_with_no_investment}").reset_index(
+    drop=True
+)
 
 # %%
 # see remaining tech categories
