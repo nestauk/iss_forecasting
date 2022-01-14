@@ -20,6 +20,9 @@
 # %%
 from iss_forecasting.getters.iss_green_pilot_ts import get_iss_green_pilot_time_series
 from iss_forecasting.utils.processing import find_zero_items
+from iss_forecasting.analysis.utils.plotting import plot_two_y_one_x
+import altair as alt
+import pandas as pd
 
 # %%
 # load iss green time series data
@@ -75,7 +78,45 @@ categories_with_no_investment
 iss_ts = iss_ts.query(f"tech_category != {categories_with_no_investment}").reset_index(
     drop=True
 )
-
 # %%
 # see remaining tech categories
 iss_ts.tech_category.unique()
+# %%
+# list of tech categories that include all ISS green categories -- is this correct?
+iss_green_cats = [
+    "Low carbon heating",
+    "EEM",
+    "Solar",
+    "Wind & offshore",
+    "Hydrogen & fuel cells",
+    "Batteries",
+    "Bioenergy",
+    "Carbon capture & storage",
+]
+
+# groupby and sum for all ISS green cats to create 'ISS green categories combined'
+iss_ts_green = (
+    iss_ts.query(f"tech_category == {iss_green_cats}")
+    .groupby("year", as_index=False)
+    .sum()
+    .assign(tech_category="ISS green categories combined")
+)
+
+# add ISS green cats grouping back into ISS time series
+iss_ts = pd.concat([iss_ts, iss_ts_green]).reset_index(drop=True)
+
+# %%
+# plot research funding vs private investment for each tech category
+tech_cats = iss_ts.tech_category.unique()
+plots_ts = alt.vconcat()
+for tech_cat in tech_cats:
+    iss_ts_current_tc = iss_ts.query(f"tech_category == '{tech_cat}'")
+    plots_ts &= plot_two_y_one_x(
+        data_source=iss_ts_current_tc,
+        x="year:O",
+        y1="research_funding_total:Q",
+        y2="investment_raised_total:Q",
+        chart_title=f"{tech_cat} research funding vs. investment over time",
+    )
+
+plots_ts
