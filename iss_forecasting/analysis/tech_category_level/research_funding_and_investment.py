@@ -42,6 +42,28 @@ iss_ts.columns
 # `tech_category` = technology category e.g 'Heat pumps', 'Batteries'
 
 # %%
+# see tech categories
+iss_ts.tech_category.unique()
+
+# %% [markdown]
+# Note that some of the technology categories include other tech categories.<br>
+# `'Low carbon heating'` includes:
+# - `'Heat pumps'`
+# - `'Geothermal energy'`
+# - `'Solar thermal'`
+# - `'District heating'`
+# - `'Hydrogen heating'`
+# - `'Biomass heating'`
+# - `'Micro CHP'`
+# - `'Heat storage'`
+#
+# `'EEM'` (energy efficiency and management) includes:
+# - `'Insulation & retrofit'`
+# - `'Energy management'` -- this includes companies working on things like smart homes, smart meters, demand response and load shifting
+#
+# Note that some companies in this dataset can belong to more than one technology category.
+
+# %%
 # check for tech categories with no investment
 categories_with_no_investment = find_zero_items(
     df=iss_ts, item_col="tech_category", value_col="investment_raised_total"
@@ -57,24 +79,3 @@ iss_ts = iss_ts.query(f"tech_category != {categories_with_no_investment}").reset
 # %%
 # see remaining tech categories
 iss_ts.tech_category.unique()
-
-# %% [markdown]
-# Note that some of the technology categories include other tech categories.<br>
-# `'Low carbon heating'` includes:
-# - `'Heat pumps'`
-# - `'Geothermal energy'` -- filtered out in this analysis as no investment
-# - `'Solar thermal'` -- there is `Solar` and `Solar thermal`, difference?
-# - `'District heating'` -- filtered out in this analysis as no investment
-# - `'Hydrogen heating'`
-# - `'Biomass heating'`
-# - `'Micro CHP'`
-# - `'Heat storage'`
-#
-# `'EEM'` (energy efficiency and management) includes:
-# - `'Insulation & retrofit'`
-# - `'Smart homes'` -- missing individually in this time series data? included in 'Energy management'? Is 'Energy management' included in 'EEM'? It doesn't look like it as 'Energy management' has higher values than 'EEM' in 2007..?
-# - `'Smart meters'` -- missing individually in this time series data? included in 'Energy management'?
-# - `'Demand response'` -- missing individually in this time series data? included in 'Energy management'?
-# - `'Load shifting'` -- missing individually in this time series data? included in 'Energy management'?
-
-# %%
