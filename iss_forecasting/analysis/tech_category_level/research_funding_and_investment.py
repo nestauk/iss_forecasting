@@ -16,6 +16,7 @@
 
 # %% [markdown]
 # ## Exploring the relationship between research funding and private investment
+# This notebook looks at the relationship between research funding and private investment. It uses pilot data produced from [Innovation Sweet Spots](https://github.com/nestauk/innovation_sweet_spots) that focuses on companies in technology sectors that could help tackle climate change. The underlying research funding data comes from UKRI's Gateway to Research and private investment data comes from Crunchbase.
 
 # %%
 from iss_forecasting.getters.iss_green_pilot_ts import get_iss_green_pilot_time_series
@@ -26,8 +27,8 @@ from iss_forecasting.utils.processing import find_zero_items
 iss_ts = get_iss_green_pilot_time_series()
 
 # %%
-# view column headings
-iss_ts.columns
+# view sample of dataframe
+iss_ts.tail(5)
 
 # %% [markdown]
 # Column descriptions:<br>
