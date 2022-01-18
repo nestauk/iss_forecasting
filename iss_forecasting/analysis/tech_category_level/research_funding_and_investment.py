@@ -20,7 +20,7 @@
 # %%
 from iss_forecasting.getters.iss_green_pilot_ts import get_iss_green_pilot_time_series
 from iss_forecasting.utils.processing import find_zero_items
-from iss_forecasting.analysis.utils.plotting import plot_two_y_one_x
+from iss_forecasting.analysis.utils.plotting import plot_two_y_one_x, lagplot, plot_lags
 import altair as alt
 import pandas as pd
 
@@ -80,28 +80,32 @@ iss_ts = iss_ts.query(f"tech_category != {categories_with_no_investment}").reset
 # see remaining tech categories
 iss_ts.tech_category.unique()
 # %%
-# list of tech categories that include all ISS green categories -- is this correct?
-iss_green_cats = [
-    "Low carbon heating",
-    "EEM",
-    "Solar",
-    "Wind & offshore",
-    "Hydrogen & fuel cells",
-    "Batteries",
-    "Bioenergy",
-    "Carbon capture & storage",
-]
+# # # this cell is commented out as some companies are in more than one tech cat,
+# # # therefore some companies will be counted more than once in the
+# # # 'ISS green categories combined'. This code may be used later depending on
+# # # how data is deduplicated...
+# # list of tech categories that include all ISS green categories -- is this correct?
+# iss_green_cats = [
+#     "Low carbon heating",
+#     "EEM",
+#     "Solar",
+#     "Wind & offshore",
+#     "Hydrogen & fuel cells",
+#     "Batteries",
+#     "Bioenergy",
+#     "Carbon capture & storage",
+# ]
 
-# groupby and sum for all ISS green cats to create 'ISS green categories combined'
-iss_ts_green = (
-    iss_ts.query(f"tech_category == {iss_green_cats}")
-    .groupby("year", as_index=False)
-    .sum()
-    .assign(tech_category="ISS green categories combined")
-)
+# # groupby and sum for all ISS green cats to create 'ISS green categories combined'
+# iss_ts_green = (
+#     iss_ts.query(f"tech_category == {iss_green_cats}")
+#     .groupby("year", as_index=False)
+#     .sum()
+#     .assign(tech_category="ISS green categories combined")
+# )
 
-# add ISS green cats grouping back into ISS time series
-iss_ts = pd.concat([iss_ts, iss_ts_green]).reset_index(drop=True)
+# # add ISS green cats grouping back into ISS time series
+# iss_ts = pd.concat([iss_ts, iss_ts_green]).reset_index(drop=True)
 
 # %%
 # plot research funding vs private investment for each tech category
@@ -118,3 +122,19 @@ for tech_cat in tech_cats:
     )
 
 plots_ts
+
+# %% [markdown]
+# Looking at the above plots, there does not seem to be an obvious relationship between research funding and private investment that is consistent across all tech categories.
+
+# %%
+for tech_cat in iss_ts.tech_category.unique():
+    tech_cat_df = iss_ts.query(f"tech_category == '{tech_cat}'")
+    plot = plot_lags(
+        x=tech_cat_df.research_funding_total,
+        title=tech_cat,
+        y=tech_cat_df.investment_raised_total,
+        lags=6,
+        nrows=1,
+    )
+
+# %%
