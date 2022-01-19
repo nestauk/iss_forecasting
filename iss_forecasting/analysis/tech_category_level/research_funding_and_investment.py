@@ -80,34 +80,6 @@ iss_ts = iss_ts.query(f"tech_category != {categories_with_no_investment}").reset
 # see remaining tech categories
 iss_ts.tech_category.unique()
 # %%
-# # # this cell is commented out as some companies are in more than one tech cat,
-# # # therefore some companies will be counted more than once in the
-# # # 'ISS green categories combined'. This code may be used later depending on
-# # # how data is deduplicated...
-# # list of tech categories that include all ISS green categories -- is this correct?
-# iss_green_cats = [
-#     "Low carbon heating",
-#     "EEM",
-#     "Solar",
-#     "Wind & offshore",
-#     "Hydrogen & fuel cells",
-#     "Batteries",
-#     "Bioenergy",
-#     "Carbon capture & storage",
-# ]
-
-# # groupby and sum for all ISS green cats to create 'ISS green categories combined'
-# iss_ts_green = (
-#     iss_ts.query(f"tech_category == {iss_green_cats}")
-#     .groupby("year", as_index=False)
-#     .sum()
-#     .assign(tech_category="ISS green categories combined")
-# )
-
-# # add ISS green cats grouping back into ISS time series
-# iss_ts = pd.concat([iss_ts, iss_ts_green]).reset_index(drop=True)
-
-# %%
 # plot research funding vs private investment for each tech category
 tech_cats = iss_ts.tech_category.unique()
 plots_ts = alt.vconcat()
