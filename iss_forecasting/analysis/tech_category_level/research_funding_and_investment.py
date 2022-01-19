@@ -128,11 +128,11 @@ plots_ts
 
 # %%
 for tech_cat in iss_ts.tech_category.unique():
-    tech_cat_df = iss_ts.query(f"tech_category == '{tech_cat}'")
+    iss_ts_current_tc = iss_ts.query(f"tech_category == '{tech_cat}'")
     plot = plot_lags(
-        x=tech_cat_df.research_funding_total,
+        x=iss_ts_current_tc.research_funding_total,
         title=tech_cat,
-        y=tech_cat_df.investment_raised_total,
+        y=iss_ts_current_tc.investment_raised_total,
         lags=6,
         nrows=1,
     )
