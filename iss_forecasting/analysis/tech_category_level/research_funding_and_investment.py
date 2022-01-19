@@ -99,14 +99,19 @@ plots_ts
 # Looking at the above plots, there does not seem to be an obvious relationship between research funding and private investment that is consistent across all tech categories.
 
 # %%
+# plot research funding lagged against private investment for each technology category
 for tech_cat in iss_ts.tech_category.unique():
     iss_ts_current_tc = iss_ts.query(f"tech_category == '{tech_cat}'")
     plot = plot_lags(
         x=iss_ts_current_tc.research_funding_total,
         title=tech_cat,
         y=iss_ts_current_tc.investment_raised_total,
-        lags=6,
+        lags=9,
         nrows=1,
     )
+
+# %% [markdown]
+# Looking at the above lag plots, there does not seem to be a common time lag between research funding and private investment.<br>
+# The Batteries technology category has the highest correlation values with high correlation between private investment and research funding lagged by 4 years+.
 
 # %%
