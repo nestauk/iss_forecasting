@@ -21,8 +21,10 @@
 from iss_forecasting.getters.iss_green_pilot_ts import get_iss_green_pilot_time_series
 from iss_forecasting.utils.processing import find_zero_items
 from iss_forecasting.analysis.utils.plotting import plot_two_y_one_x, lagplot, plot_lags
+from iss_forecasting.utils.stats_tests import stationarity_adf, stationarity_kpss
 import altair as alt
 import pandas as pd
+from statsmodels.tsa.stattools import ccf
 
 # %%
 # load iss green time series data
@@ -113,5 +115,20 @@ for tech_cat in iss_ts.tech_category.unique():
 # %% [markdown]
 # Looking at the above lag plots, there does not seem to be a common time lag between research funding and private investment.<br>
 # The Batteries technology category has the highest correlation values with high correlation between private investment and research funding lagged by 4 years+.
+
+# %%
+for tech_cat in iss_ts.tech_category.unique():
+    tech_cat_df = iss_ts.query(f"tech_category == '{tech_cat}'")
+    stationarity_adf(tech_cat_df.research_funding_total, tech_cat + " research funding")
+    stationarity_kpss(
+        tech_cat_df.research_funding_total, tech_cat + " research funding"
+    )
+    stationarity_adf(tech_cat_df.investment_raised_total, tech_cat + " investment")
+    stationarity_kpss(tech_cat_df.investment_raised_total, tech_cat + " investment")
+    print("*" * 10)
+
+# %%
+
+# %%
 
 # %%
