@@ -35,8 +35,8 @@ iss_ts.tail(5)
 # `year` = year (between 2007 and 2021)<br>
 # `research_no_of_projects` = number of research projects started in a specific `year` (GtR)<br>
 # `research_funding_total` = research funding amount (GBP 1000s) awarded in a specific `year` (GtR)<br>
-# `investment_rounds` = number of rounds of invesmtnet in a specific `year` (Crunchbase)<br>
-# `investment_raised_total` = raised investment amount (GBP 1000s) a specific `year` (Crunchbase)<br>
+# `investment_rounds` = number of rounds of investment in a specific `year` (Crunchbase)<br>
+# `investment_raised_total` = raised investment amount (GBP 1000s) in a specific `year` (Crunchbase)<br>
 # `no_of_orgs_founded` = number of new companies started in the `year` (Crunchbase)<br>
 # `articles` = number of articles in the Guardian with the technology keywords and phrases<br>
 # `speeches` = number of speeches in Hansard with the technology keywords and phrases<br>
