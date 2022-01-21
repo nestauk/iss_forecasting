@@ -127,7 +127,6 @@ def plot_lags(
     y: Optional[pd.Series] = None,
     lags: int = 6,
     nrows: int = 1,
-    **kwargs: int,
 ) -> plt.Figure:
     """Plots multple lag plots for time series data.
     Can plot lagged x vs x or lagged x vs y.
@@ -144,11 +143,16 @@ def plot_lags(
 
     This function is adapted from https://www.kaggle.com/ryanholbrook/time-series-as-features
     """
-    kwargs.setdefault("nrows", nrows)
-    kwargs.setdefault("ncols", math.ceil((lags + 1) / nrows))
-    kwargs.setdefault("figsize", (kwargs["ncols"] * 2, nrows * 2 + 0.5))
-    fig, axs = plt.subplots(sharex=True, sharey=True, squeeze=False, **kwargs)
-    for ax, k in zip(fig.get_axes(), range(kwargs["nrows"] * kwargs["ncols"])):
+    ncols = math.ceil((lags + 1) / nrows)
+    fig, axs = plt.subplots(
+        sharex=True,
+        sharey=True,
+        squeeze=False,
+        nrows=nrows,
+        ncols=ncols,
+        figsize=(ncols * 2, nrows * 2 + 0.5),
+    )
+    for ax, k in zip(fig.get_axes(), range(nrows * ncols)):
         if k <= lags:
             ax = lagplot(x, y, lag=k, ax=ax)
             ax.set_title(f"Lag {k} {title}", fontdict=dict(fontsize=8.5))

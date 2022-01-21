@@ -106,7 +106,7 @@ for tech_cat in iss_ts.tech_category.unique():
         x=iss_ts_current_tc.research_funding_total,
         title=tech_cat,
         y=iss_ts_current_tc.investment_raised_total,
-        lags=12,
+        lags=8,
         nrows=1,
     )
 
