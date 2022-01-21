@@ -1,18 +1,19 @@
 """Processing utils
 """
+import pandas as pd
 
 
-def find_zero_items(df, item_col, value_col):
+def find_zero_items(df: pd.DataFrame, item_col: str, value_col: str) -> list:
     """Returns a list of items with 0s for all records in a
     specified value column
 
     Args:
-        df (df): dataframe to find items with 0 values
-        item_col (str): column with item names
-        value_col (str): column with value to check for 0s
+        df: Dataframe to find items with 0 values
+        item_col: Column with item names
+        value_col: Column with value to check for 0s
 
     Returns:
-        list: list of items with 0s for all records in a specified value column
+        List of items with 0s for all records in a specified value column
     """
     return [
         item

@@ -1,8 +1,11 @@
 """Analysis utils for plotting
 """
+from typing import Optional
 import altair as alt
 import matplotlib.pyplot as plt
+import pandas as pd
 from matplotlib.offsetbox import AnchoredText
+from altair.vegalite.v4.api import LayerChart
 import seaborn as sns
 import math
 
@@ -26,33 +29,33 @@ plot_params = dict(
 
 
 def plot_two_y_one_x(
-    data_source,
-    x,
-    y1,
-    y2,
-    chart_title,
-    line_1_colour="#5276A7",
-    line_2_colour="#57A44C",
-):
+    data_source: pd.DataFrame,
+    x: str,
+    y1: str,
+    y2: str,
+    chart_title: str,
+    line_1_colour: str = "#5276A7",
+    line_2_colour: str = "#57A44C",
+) -> LayerChart:
     """Create an altair plot with two y axes and one x axis.
 
     Note that for x, y1 and y2 the data type can be specified
     as described here: https://altair-viz.github.io/user_guide/data.html
 
     Args:
-        data_source (df): dataframe containing data to be plotted
-        x (str): column containing data for x axis and data type
+        data_source: Dataframe containing data to be plotted
+        x: Column containing data for x axis and data type
             e.g 'year:O'
-        y1 (str): column containing data for y1 axis and data type
+        y1: Column containing data for y1 axis and data type
             e.g 'research_funding_total:Q'
-        y2 (str): column containing data for y1 axis and data type
+        y2: Column containing data for y1 axis and data type
             e.g 'investment_raised_total:Q'
-        line_1_colour (str): colour code for line 1, defaults to "#5276A7"
-        line_2_colouur (str): colour code for line 2, defaults to "#57A44C"
-        chart_title (str): title for chart
+        line_1_colour: Colour code for line 1, defaults to "#5276A7"
+        line_2_colour: Colour code for line 2, defaults to "#57A44C"
+        chart_title: Title for chart
 
     Returns:
-        altair.vegalite.v4.api.LayerChart: plot with two y axes and one x axis
+        Plot with two y axes and one x axis
     """
     base = alt.Chart(data_source, title=chart_title).encode(alt.X(x))
     line_1 = base.mark_line(color=line_1_colour).encode(
@@ -64,19 +67,23 @@ def plot_two_y_one_x(
     return alt.layer(line_1, line_2).resolve_scale(y="independent")
 
 
-def lagplot(x, y=None, lag=1, ax=None, **kwargs):
+def lagplot(
+    x: pd.Series,
+    y: Optional[pd.Series] = None,
+    lag: int = 1,
+    ax: Optional[int] = None,
+) -> plt.Axes:
     """Plots a single lag plot for time series data.
     Can plot lagged x vs x or lagged x vs y.
 
     Args:
-        x (pd.Series): x time series to be lagged
-        y (pd.Series, optional): y time series, defaults to None. If None,
-            y will be set to x
-        lag (int, optional): how much to lag x time series by, defaults to 1.
-        ax (int, optional): axes to draw the plot onto, defaults to None.
+        x: X axis time series to be lagged
+        y: Y axis time series, defaults to None. If None, y will be set to x.
+        lag: How much to lag x time series by, defaults to 1.
+        ax: Axes to draw the plot onto, defaults to None.
 
     Returns:
-        matplotlib.axes._subplots.AxesSubplot: Single lag plot
+        Single lag plot
 
     This function is adapted from https://www.kaggle.com/ryanholbrook/time-series-as-features
     """
@@ -101,7 +108,6 @@ def lagplot(x, y=None, lag=1, ax=None, **kwargs):
         order=1,
         ci=None,
         ax=ax,
-        **kwargs,
     )
     at = AnchoredText(
         f"{corr:.2f}",
@@ -115,23 +121,26 @@ def lagplot(x, y=None, lag=1, ax=None, **kwargs):
     return ax
 
 
-def plot_lags(x, title, y=None, lags=6, nrows=1, lagplot_kwargs={}, **kwargs):
+def plot_lags(
+    x: pd.Series,
+    title: str,
+    y: Optional[pd.Series] = None,
+    lags: int = 6,
+    nrows: int = 1,
+    **kwargs: int,
+) -> plt.Figure:
     """Plots multple lag plots for time series data.
     Can plot lagged x vs x or lagged x vs y.
 
     Args:
-        x (pd.Series): x time series to be lagged
-        title (str): title information to display in addition to
-            number of lags
-        y (pd.Series, optional): y time series, defaults to None.
-            If None, y will be set to x
-        lags (int, optional): how many lags to display, defaults to 6.
-        nrows (int, optional): number of rows to split the plots over,
-            defaults to 1.
-        lagplot_kwargs (dict, optional): defaults to {}.
+        x: X axis time series to be lagged
+        title: Title information to display in addition to number of lags
+        y: Y axis time series, defaults to None. If None, y will be set to x
+        lags: How many lags to display, defaults to 6.
+        nrows: Number of rows to split the plots over, defaults to 1.
 
     Returns:
-        matplotlib.figure.Figure: Multiple lag plots
+        Multiple lag plots
 
     This function is adapted from https://www.kaggle.com/ryanholbrook/time-series-as-features
     """
@@ -141,7 +150,7 @@ def plot_lags(x, title, y=None, lags=6, nrows=1, lagplot_kwargs={}, **kwargs):
     fig, axs = plt.subplots(sharex=True, sharey=True, squeeze=False, **kwargs)
     for ax, k in zip(fig.get_axes(), range(kwargs["nrows"] * kwargs["ncols"])):
         if k <= lags:
-            ax = lagplot(x, y, lag=k, ax=ax, **lagplot_kwargs)
+            ax = lagplot(x, y, lag=k, ax=ax)
             ax.set_title(f"Lag {k} {title}", fontdict=dict(fontsize=8.5))
             ax.set(xlabel="", ylabel="")
         else:
