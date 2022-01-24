@@ -9,6 +9,7 @@
   - Setup the conda environment
   - Configure pre-commit
   - Configure metaflow to use AWS
+- Run `make inputs-pull` to download inputs from S3
 
 ## Contributor guidelines
 
