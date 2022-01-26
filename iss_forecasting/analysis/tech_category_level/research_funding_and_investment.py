@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# ## Exploring the relationship between research funding and private investment
+# # Exploring the relationship between research funding and private investment
 # This notebook looks at the relationship between research funding and private investment. It uses pilot data produced from [Innovation Sweet Spots](https://github.com/nestauk/innovation_sweet_spots) that focuses on companies in technology sectors that could help tackle climate change. The underlying research funding data comes from UKRI's Gateway to Research and private investment data comes from Crunchbase.
 # %%
 from iss_forecasting.getters.iss_green_pilot_ts import get_iss_green_pilot_time_series
@@ -24,7 +24,14 @@ from iss_forecasting.analysis.utils.plotting import plot_two_y_one_x, lagplot, p
 from iss_forecasting.utils.stats_tests import stationarity_adf, stationarity_kpss
 import altair as alt
 import pandas as pd
+import numpy as np
 from statsmodels.tsa.stattools import ccf
+from scipy.signal import detrend
+from statsmodels.tsa.stattools import grangercausalitytests
+import warnings
+from statsmodels.tsa.stattools import InterpolationWarning
+
+warnings.filterwarnings(action="ignore", category=InterpolationWarning)
 
 # %%
 # load iss green time series data
@@ -81,8 +88,10 @@ iss_ts = iss_ts.query(f"tech_category != {categories_with_no_investment}").reset
 # %%
 # see remaining tech categories
 iss_ts.tech_category.unique()
+# %% [markdown]
+# ## Plot research funding vs private investment for each tech category
+
 # %%
-# plot research funding vs private investment for each tech category
 tech_cats = iss_ts.tech_category.unique()
 plots_ts = alt.vconcat()
 for tech_cat in tech_cats:
@@ -100,8 +109,11 @@ plots_ts
 # %% [markdown]
 # Looking at the above plots, there does not seem to be an obvious relationship between research funding and private investment that is consistent across all tech categories.
 
+# %% [markdown]
+# ## Cross Correlation Plots
+# Plot research funding lagged against private investment for each technology category
+
 # %%
-# plot research funding lagged against private investment for each technology category
 for tech_cat in iss_ts.tech_category.unique():
     iss_ts_current_tc = iss_ts.query(f"tech_category == '{tech_cat}'")
     plot = plot_lags(
@@ -116,19 +128,87 @@ for tech_cat in iss_ts.tech_category.unique():
 # Looking at the above lag plots, there does not seem to be a common time lag between research funding and private investment.<br>
 # The Batteries technology category has the highest correlation values with high correlation between private investment and research funding lagged by 4 years+.
 
-# %%
-for tech_cat in iss_ts.tech_category.unique():
-    tech_cat_df = iss_ts.query(f"tech_category == '{tech_cat}'")
-    stationarity_adf(tech_cat_df.research_funding_total, tech_cat + " research funding")
-    stationarity_kpss(
-        tech_cat_df.research_funding_total, tech_cat + " research funding"
-    )
-    stationarity_adf(tech_cat_df.investment_raised_total, tech_cat + " investment")
-    stationarity_kpss(tech_cat_df.investment_raised_total, tech_cat + " investment")
-    print("*" * 10)
+# %% [markdown]
+# # Granger Causality
+# The Granger causality test is a statistical hypothesis test for determining whether one time series is useful in forecasting another. The two time series being tested need to be stationary. We can test for stationarity using the ADF and KPSS tests.<br><br>
+# From [statsmodels stationarity and detrending example](https://www.statsmodels.org/dev/examples/notebooks/generated/stationarity_detrending_adf_kpss.html):<br>
+# It is always better to apply both the ADF and KPSS tests, so that it can be ensured that the series is truly stationary. Possible outcomes of applying these stationary tests are as follows:
+#
+# * Case 1: Both tests conclude that the series is not stationary - The series is not stationary
+# * Case 2: Both tests conclude that the series is stationary - The series is stationary
+# * Case 3: KPSS indicates stationarity and ADF indicates non-stationarity - The series is trend stationary. Trend needs to be removed to make series strict stationary. The detrended series is checked for stationarity.
+# * Case 4: KPSS indicates non-stationarity and ADF indicates stationarity - The series is difference stationary. Differencing is to be used to make series stationary. The differenced series is checked for stationarity.
+
+# %% [markdown]
+# We will test for granger causality in the battery industry.
 
 # %%
+tech_cat = "Batteries"
+tc_ts = iss_ts[iss_ts.tech_category == tech_cat]
+tc_ts_rf = tc_ts.research_funding_total
+tc_ts_pi = tc_ts.investment_raised_total
+
+# %% [markdown]
+# First check if the time series are stationary:
 
 # %%
+stationarity_adf(tc_ts_rf, f"{tech_cat} research funding")
+stationarity_kpss(tc_ts_rf, f"{tech_cat} research funding")
+stationarity_adf(tc_ts_pi, f"{tech_cat} investment")
+stationarity_kpss(tc_ts_pi, f"{tech_cat} investment")
+
+# %% [markdown]
+# Batteries research funding is stationary according to KPSS but not stationary according to ADF, to try and remove stationarity from the time series, we can detrend the time series.<br>
+# Batteries private investment is not stationary by KPSS or ADF, to try and remove stationarity from the time series, we can difference the time series.
+
+# %%
+tc_ts_rf_detrended = pd.Series(
+    data=detrend(tc_ts_rf, type="linear", bp=[0, 10]),
+    name=tc_ts_rf.name,
+    index=tc_ts_rf.index,
+)
+tc_ts_pi_diff = tc_ts_pi.diff().dropna()
+
+# %% [markdown]
+# Check again if the time series are stationary:
+
+# %%
+stationarity_adf(tc_ts_rf_detrended, f"{tech_cat} research funding")
+stationarity_kpss(tc_ts_rf_detrended, f"{tech_cat} research funding")
+stationarity_adf(tc_ts_pi_diff, f"{tech_cat} investment")
+stationarity_kpss(tc_ts_pi_diff, f"{tech_cat} investment")
+
+# %% [markdown]
+# The research funding ADF test is stationary when the detrending is done with breakpoints at 0th and 10th time points (`bp=[0, 10]`).<br>
+# Try rerunning the detrending with `bp=[0]` to see that the research funding ADF test still says the time series is not stationary (although much closer to being stationary than before).
+
+# %%
+combine_ts = pd.concat([tc_ts_rf_detrended, tc_ts_pi_diff], axis=1)
+combine_ts = combine_ts.tail(-1)
+
+# %% [markdown]
+# Due to the differencing, investment_rasied_total doesn't have a value for the first row. So the first row can be dropped.
+
+# %% [markdown]
+# The granger causality test used below tests for if the second time series is a predictor for the first time series. More details about the function can be found [here](https://www.statsmodels.org/dev/generated/statsmodels.tsa.stattools.grangercausalitytests.html). If all 4 tests p values are below 0.05, we can say the second time series granger causes the first time series.
+
+# %%
+rf_predict_pi = grangercausalitytests(
+    combine_ts[["investment_raised_total", "research_funding_total"]], maxlag=4
+)
+
+# %% [markdown]
+# This suggests that research funding lagged by 4 years (but not lagged by 1-3 years) is a predictor for private investment.
+
+# %%
+pi_predict_rf = grangercausalitytests(
+    combine_ts[["research_funding_total", "investment_raised_total"]], maxlag=4
+)
+
+# %% [markdown]
+# This suggests that private investment (lagged from 1-4 years) is not a predictor for research funding.
+
+# %% [markdown]
+# At this stage, I don't think we can draw too much from this but this process can be rerun when we have the data at split at smaller time intervals.
 
 # %%
