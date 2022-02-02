@@ -9,7 +9,7 @@ def stationarity_adf(time_series: ArrayLike, name: str) -> None:
     and print the results
 
     Args:
-        time_series: Time series to be checked
+        time_series: Time series to be checked (must be 1 dimensional)
         name: Name of time series
     """
     results = adfuller(time_series)
@@ -27,7 +27,7 @@ def stationarity_kpss(time_series: ArrayLike, name: str) -> None:
     and print the results
 
     Args:
-        time_series: Time series to be checked
+        time_series: Time series to be checked (must be 1 dimensional)
         name: Name of time series
     """
     results = kpss(time_series)
