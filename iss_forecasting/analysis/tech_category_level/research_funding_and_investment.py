@@ -120,13 +120,14 @@ for tech_cat in iss_ts.tech_category.unique():
         x=iss_ts_current_tc.research_funding_total,
         title=tech_cat,
         y=iss_ts_current_tc.investment_raised_total,
-        lags=8,
-        nrows=1,
+        lags=9,
+        nrows=2,
     )
 
 # %% [markdown]
 # Looking at the above lag plots, there does not seem to be a common time lag between research funding and private investment.<br>
-# The Batteries technology category has the highest correlation values with high correlation between private investment and research funding lagged by 4 years+.
+# The Batteries technology category has the highest correlation values with high correlation between private investment and research funding lagged by 4 years+.<br>
+# The confidence intervals are quite wide across the plots. The Batteries technology category has a reasonable confidence interval when lagged by 4 years+.
 
 # %% [markdown]
 # # Granger Causality
@@ -210,5 +211,3 @@ pi_predict_rf = grangercausalitytests(
 
 # %% [markdown]
 # At this stage, I don't think we can draw too much from this but this process can be rerun when we have the data at split at smaller time intervals.
-
-# %%
