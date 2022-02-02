@@ -7,6 +7,7 @@ import pandas as pd
 from matplotlib.offsetbox import AnchoredText
 from altair.vegalite.v4.api import LayerChart
 import seaborn as sns
+import pingouin as pg
 import math
 
 # Set Matplotlib defaults
@@ -89,7 +90,9 @@ def lagplot(
     """
     x_ = x.shift(lag)
     y_ = y if y is not None else x
-    corr = y_.corr(x_)
+    pg_corr = pg.corr(x_, y_).round(2)
+    r = pg_corr["r"].values[0]
+    ci = pg_corr["CI95%"].values[0]
     if ax is None:
         _, ax = plt.subplots()
     scatter_kws = dict(
@@ -110,8 +113,8 @@ def lagplot(
         ax=ax,
     )
     at = AnchoredText(
-        f"{corr:.2f}",
-        prop=dict(size="medium"),
+        f"r:{r}, ci:{ci}",
+        prop=dict(size=8.5, fontweight="bold"),
         frameon=True,
         loc="upper right",
     )
