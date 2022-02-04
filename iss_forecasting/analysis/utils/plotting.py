@@ -90,7 +90,7 @@ def lagplot(
     """
     x_ = x.shift(lag)
     y_ = y if y is not None else x
-    pg_corr = pg.corr(x_, y_).round(2)
+    pg_corr = pg.corr(x_, y_, method="spearman").round(2)
     r = pg_corr["r"].values[0]
     ci = pg_corr["CI95%"].values[0]
     if ax is None:
