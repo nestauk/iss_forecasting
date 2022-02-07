@@ -126,8 +126,15 @@ for tech_cat in iss_ts.tech_category.unique():
 
 # %% [markdown]
 # Looking at the above lag plots, there does not seem to be a common time lag between research funding and private investment.<br>
-# The Batteries technology category has the highest correlation values with high correlation between private investment and research funding lagged by 4 years+.<br>
-# The confidence intervals are quite wide across the plots. The Batteries technology category has a reasonable confidence interval when lagged by 4 years+.
+# `Micro CHP`,`Solar thermal`, `Insulation & retrofit`, `Solar`, `Wind & offshore`, `Hydrogen & fuel cells`, `Bioenergy`, `Carbon capture & storage`  -- there are no significant correlations at any lag.<br>
+# `Heat Storage` -- there are correlations at lags 0, 2, and 4. <br>
+# `Heat Pumps` -- there is correlation at lag 3.<br>
+# `Hydrogen heating` -- there is correlation at lag 2.<br>
+# `Biomass heating` -- there is correlation at lag 1.<br>
+# `Energy management` -- there is correlation at lag 4 and lag 6.<br>
+# `Low carbon heating` -- there is correlation at lag 0 and negative correlation at lag 4 and lag 9.<br>
+# `EEM` -- there is correlation at lags 4 and 6.<br>
+# `Batteries` -- the correlations are significant at all lags, with strong correlations from lags 1 and higher.<br>
 
 # %% [markdown]
 # # Granger Causality
