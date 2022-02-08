@@ -23,6 +23,7 @@ from iss_forecasting.getters.iss_green_pilot_ts import get_iss_green_pilot_time_
 from iss_forecasting.utils.processing import find_zero_items
 from iss_forecasting.analysis.utils.plotting import plot_two_y_one_x, lagplot, plot_lags
 from iss_forecasting.utils.stats_tests import stationarity_adf, stationarity_kpss
+from iss_forecasting.analysis.utils.time_series import generate_ts, groupby_time_period
 import altair as alt
 import pandas as pd
 import numpy as np
@@ -35,53 +36,11 @@ from statsmodels.tsa.stattools import InterpolationWarning
 warnings.filterwarnings(action="ignore", category=InterpolationWarning)
 
 # %%
-"""Move these function to python code, trim down generate_ts?"""
-
-
-def generate_ts(
-    period: str, lag: int, start: str = "01/01/2007", end: str = "12/31/2021"
-) -> pd.DataFrame:
-    np.random.seed(40)
-    dates = pd.period_range(start, end, freq=period).to_timestamp()
-    tech_category = f"Generated {period}"
-    research_funding_total = [abs(np.random.normal()) * 100]
-    n_dates = len(dates)
-    for _ in range(n_dates):
-        research_funding_total.append(
-            research_funding_total[-1] * 1.1 * abs(np.random.normal())
-            + 200 * abs(np.random.normal())
-        )
-    investment_raised_total = [
-        item * 2 * abs(np.random.normal()) for item in research_funding_total
-    ]
-    research_funding_total = research_funding_total[lag:]
-    investment_raised_total = investment_raised_total[:-lag]
-    dates = dates[lag - 1 :]
-    n_dates = len(dates)
-    gen_ts_df = pd.DataFrame(
-        {
-            "time_period": dates,
-            "research_funding_total": research_funding_total,
-            "investment_raised_total": investment_raised_total,
-            "tech_category": [tech_category] * n_dates,
-        }
-    )
-    gen_ts_df["time_period"] = gen_ts_df["time_period"].dt.strftime("%Y-%m-%d")
-    return gen_ts_df.astype({"time_period": "datetime64[ns]"})
-
-
-def groupby_time_period(time_series: pd.DataFrame, period: str) -> pd.DataFrame:
-    grouped = time_series.groupby(time_series["time_period"].dt.to_period(period)).agg(
-        "sum"
-    )
-    grouped.index = grouped.index.astype("datetime64[ns]")
-    grouped["tech_category"] = f"Generated {period}"
-    return grouped.reset_index()
-
-
-# %%
 # Generate monthly data
 gen_ts_months = generate_ts(period="M", lag=12)
+
+# %%
+gen_ts_months
 
 # %%
 # Group monthly data into quarterly and yearly data
