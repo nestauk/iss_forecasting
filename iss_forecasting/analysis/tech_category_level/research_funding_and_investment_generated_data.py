@@ -78,7 +78,7 @@ for ts, lags, nrows in zip(tss, lagss, nrowss):
     )
 
 # %% [markdown]
-# The highest correlations for monthly data is at a lag of 11-13 months<br>
+# The highest correlations for monthly data is at a lag of 12 months<br>
 # The highest correlations for the quarterly data is at a lag of 4 quarters.<br>
 # The highest correlations for yearly data is at lag of 1 year. <br>
 # The confidence intervals tend to be larger in the yearly data compared to the quarterly data which tend to be larger than the mothly data.
@@ -113,12 +113,8 @@ stationarity_kpss(rf_yearly, f"{title} research funding")
 stationarity_adf(pi_yearly, f"{title} investment")
 stationarity_kpss(pi_yearly, f"{title} investment")
 
-# %%
-# Diff yearly research funding and retest for stationarity
-rf_yearly_diff = rf_yearly.diff().dropna()
-title = "Yearly (diff)"
-stationarity_adf(rf_yearly_diff, f"{title} research funding")
-stationarity_kpss(rf_yearly_diff, f"{title} research funding")
+# %% [markdown]
+# Due to the time series being generated with some random components, the yearly data generated sometimes is non stationary.
 
 # %%
 # Test stationarity quarterly
@@ -137,15 +133,15 @@ stationarity_adf(pi_monthly, f"{title} investment")
 stationarity_kpss(pi_monthly, f"{title} investment")
 
 # %%
-# Combine research funding and private investment time series yearly, drop last row due to diff
-combine_yearly = pd.concat([rf_yearly_diff, pi_yearly], axis=1).tail(-1)
+# Combine research funding and private investment time series yearly
+combine_yearly = pd.concat([rf_yearly, pi_yearly], axis=1)
 # Check for granger causality research funding -> private investment yearly
 rf_predict_pi_yearly = grangercausalitytests(
     combine_yearly[["investment_raised_total", "research_funding_total"]], maxlag=4
 )
 
 # %% [markdown]
-# The yearly tests suggest that research funding granger causes investment at lags of 1, 2 and 3 years. Would have expected research funding granger causing investment at a lag of 1 only?
+# The yearly tests suggest that research funding granger causes investment at lags of 1, 2 and 3. Note that the test for lag 2 includes lag 1 and the test for lag 3 includes lag 2 and lag 1 etc.
 
 # %%
 # Check for granger causality private investment -> research funding yearly
@@ -165,7 +161,7 @@ rf_predict_pi_quarterly = grangercausalitytests(
 )
 
 # %% [markdown]
-# The quarterly tests suggest that research funding granger causes investment at lag 4 as expected but also finds the same for lags 5-17.
+# The quarterly tests suggest that research funding granger causes investment at lags 4 and higher.
 
 # %%
 # Check for granger causality private investment -> research funding quarterly
@@ -174,7 +170,7 @@ pi_predict_rf_quarterly = grangercausalitytests(
 )
 
 # %% [markdown]
-# Unexpectedly, the quarterly tests also suggest that investment granger causes research funding from lags 4-14.
+# The quarterly tests suggest that investment does not granger cause research funding at any lags, which is what we would expect.
 
 # %%
 # Combine research funding and private investment time series monthly
@@ -185,7 +181,7 @@ rf_predict_pi_monthly = grangercausalitytests(
 )
 
 # %% [markdown]
-# The monthly tests suggests research funding granger causes investment from the 11th-50th lag. Again, we would expect the tests to have low p values for lag 12, but then it also it also has low p values up to lag 50?
+# The monthly tests suggests research funding granger causes investment from the 11th lag, which is 1 lag earlier than expected.
 
 # %%
 # Check for granger causality private investment -> research funding monthly
@@ -194,6 +190,6 @@ pi_predict_rf_monthly = grangercausalitytests(
 )
 
 # %% [markdown]
-# The monthly tests also suggests investment granger causes research funding from the 11th-33rd lag. Also unexpected?
+# The monthly tests suggest that investment does not granger cause research funding at any lags, which is what we would expect.
 
 # %%
