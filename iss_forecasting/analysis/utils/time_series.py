@@ -28,7 +28,6 @@ def generate_ts(
     Returns:
         Generated time series data for investment_raised_total and research_funding_total.
     """
-    np.random.seed(40)
     dates = pd.period_range(start, end, freq=period).to_timestamp()
     tech_category = f"Generated {period}"
     research_funding_total = [abs(np.random.normal()) * rf_scale]
