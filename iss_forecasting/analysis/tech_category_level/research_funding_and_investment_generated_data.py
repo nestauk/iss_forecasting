@@ -141,7 +141,7 @@ rf_predict_pi_yearly = grangercausalitytests(
 )
 
 # %% [markdown]
-# The yearly tests suggest that research funding granger causes investment at lags of 1, 2 and 3. Note that the test for lag 2 includes lag 1 and the test for lag 3 includes lag 2 and lag 1 etc.
+# The yearly tests suggest that research funding granger causes investment at lags of 1 and higher. Note that the test for lag 2 includes lag 1 and the test for lag 3 includes lag 2 and lag 1 etc.
 
 # %%
 # Check for granger causality private investment -> research funding yearly
