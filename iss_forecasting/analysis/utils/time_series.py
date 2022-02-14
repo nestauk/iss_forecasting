@@ -11,30 +11,37 @@ def generate_ts(
     end: str = "12/31/2021",
     rf_scale: float = 100,
     rf_const: float = 200,
-    factor: float = 1.1,
     pi_scale: float = 2,
 ) -> pd.DataFrame:
-    """Generate dataframe containing columns for time_period, research_funding_total,
-    investment_raised_total and tech_category. research_funding_total and
-    investment_raised_total have generated time series data, where investment_raised_total
-    is research_funding_total shifted by the lag variable.
+    """Create dataframe containing columns for time_period, research_funding_total,
+    investment_raised_total and tech_category.
+
+    research_funding_total is generated using a autoregressive order one process with some
+    additional noise added to make the data more like the real research funding data.
+
+    investment_raised_total is research_funding_total shifted by the lag variable multiplied
+    by pi_scale and some noise.
 
     Args:
         period: Time period to group the data by, 'M', 'Q' or 'Y'
         lag: Number of time periods to have research_funding_total lead to investment_raised_total
         start: Start date. Defaults to "01/01/2007".
         end: End date. Defaults to "12/31/2021".
+        rf_scale: Size of first value in research funding time series
+        rf_const: Constant to be used to create successive values of research funding
+        pi_scale: Scale to generate private investment relative to research funding
 
     Returns:
         Generated time series data for investment_raised_total and research_funding_total.
     """
+    np.random.seed(1)
     dates = pd.period_range(start, end, freq=period).to_timestamp()
     tech_category = f"Generated {period}"
     research_funding_total = [abs(np.random.normal()) * rf_scale]
     n_dates = len(dates)
     for _ in range(n_dates):
         research_funding_total.append(
-            research_funding_total[-1] * factor * abs(np.random.normal())
+            research_funding_total[-1] * abs(np.random.normal())
             + rf_const * abs(np.random.normal())
         )
     investment_raised_total = [
