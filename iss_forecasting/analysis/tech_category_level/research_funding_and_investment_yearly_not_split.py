@@ -50,7 +50,7 @@ iss_ts.tail(5)
 
 # %% [markdown]
 # Column descriptions:<br>
-# `year` = year (between 2007 and 2021)<br>
+# `time_period` = time period in YYYY-MM-DD format<br>
 # `research_no_of_projects` = number of research projects started in a specific `year` (GtR)<br>
 # `research_funding_total` = research funding amount (GBP 1000s) awarded in a specific `year` (GtR)<br>
 # `investment_rounds` = number of rounds of investment in a specific `year` (Crunchbase)<br>
