@@ -1,5 +1,4 @@
-"""Statistical testing utils
-"""
+"""Statistical testing utils"""
 from statsmodels.tsa.stattools import adfuller, kpss
 from numpy.typing import ArrayLike
 

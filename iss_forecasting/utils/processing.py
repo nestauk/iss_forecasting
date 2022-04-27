@@ -1,5 +1,4 @@
-"""Processing utils
-"""
+"""Processing utils"""
 import pandas as pd
 
 
