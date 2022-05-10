@@ -11,6 +11,9 @@
   - Configure metaflow to use AWS
 - Run `make inputs-pull` to download inputs from S3
 - Run `aws s3 sync s3://iss-forecasting/outputs/` to download outputs from S3
+- Run `brew install graphviz` and `conda install -c conda-forge pygraphviz`
+  to install graphviz to be able to visualise the causal graph when using DoWhy
+
 
 ## Contributor guidelines
 
