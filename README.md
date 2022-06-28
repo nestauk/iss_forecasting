@@ -10,6 +10,7 @@
   - Configure pre-commit
   - Configure metaflow to use AWS
 - Run `make inputs-pull` to download inputs from S3
+- Run `aws s3 sync s3://iss-forecasting/outputs/` to download outputs from S3
 
 ## Contributor guidelines
 
