@@ -80,6 +80,7 @@ y_valid = validation_data.future_success
 
 # %%
 # Create dict of parameters to search
+# Note with the below search params, it will take ~1 hour to train on an M1 mac
 search_params = {
     "num_leaves": [32, 35, 48],
     "max_depth": [11, 12, 13],
@@ -176,6 +177,7 @@ save_pickle(model_path, "valid_names", valid_names)
 
 # %%
 # Train model with best validation F1 score parameters
+# Note this training only takes seconds to run
 evals_result = {}
 
 model = lgb.LGBMClassifier()
