@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -18,7 +19,10 @@
 # # Exploring the relationship between research funding and private investment
 # This notebook looks at the relationship between research funding and private investment. It uses pilot data produced from [Innovation Sweet Spots](https://github.com/nestauk/innovation_sweet_spots) that focuses on companies in technology sectors that could help tackle climate change. The underlying research funding data comes from UKRI's Gateway to Research and private investment data comes from Crunchbase.
 # %%
-from iss_forecasting.getters.iss_green_pilot_ts import get_iss_green_pilot_time_series
+from iss_forecasting.getters.iss_green_pilot_ts import (
+    get_iss_green_gtr_ts,
+    get_iss_green_cb_ts,
+)
 from iss_forecasting.utils.processing import find_zero_items
 from iss_forecasting.analysis.utils.plotting import plot_two_y_one_x, lagplot, plot_lags
 from iss_forecasting.utils.stats_tests import stationarity_adf, stationarity_kpss
@@ -34,8 +38,12 @@ from statsmodels.tsa.stattools import InterpolationWarning
 warnings.filterwarnings(action="ignore", category=InterpolationWarning)
 
 # %%
-# load iss green time series data
-iss_ts = get_iss_green_pilot_time_series()
+# load iss green time series yearly data where research funding is attributed to the start of the project
+iss_gtr_ts_yearly = get_iss_green_gtr_ts(split=True, period="year")
+iss_cb_ts_yearly = get_iss_green_cb_ts(period="year")
+iss_ts = pd.merge(
+    left=iss_gtr_ts_yearly, right=iss_cb_ts_yearly, on=["time_period", "tech_category"]
+)
 
 # %%
 # view sample of dataframe
@@ -43,14 +51,12 @@ iss_ts.tail(5)
 
 # %% [markdown]
 # Column descriptions:<br>
-# `year` = year (between 2007 and 2021)<br>
+# `time_period` = time period in YYYY-MM-DD format<br>
 # `research_no_of_projects` = number of research projects started in a specific `year` (GtR)<br>
 # `research_funding_total` = research funding amount (GBP 1000s) awarded in a specific `year` (GtR)<br>
 # `investment_rounds` = number of rounds of investment in a specific `year` (Crunchbase)<br>
 # `investment_raised_total` = raised investment amount (GBP 1000s) in a specific `year` (Crunchbase)<br>
 # `no_of_orgs_founded` = number of new companies started in the `year` (Crunchbase)<br>
-# `articles` = number of articles in the Guardian with the technology keywords and phrases<br>
-# `speeches` = number of speeches in Hansard with the technology keywords and phrases<br>
 # `tech_category` = technology category e.g 'Heat pumps', 'Batteries'
 
 # %%
@@ -98,7 +104,7 @@ for tech_cat in tech_cats:
     iss_ts_current_tc = iss_ts.query(f"tech_category == '{tech_cat}'")
     plots_ts &= plot_two_y_one_x(
         data_source=iss_ts_current_tc,
-        x="year:O",
+        x="time_period:T",
         y1="research_funding_total:Q",
         y2="investment_raised_total:Q",
         chart_title=f"{tech_cat} research funding vs. investment over time",
@@ -170,19 +176,15 @@ stationarity_kpss(tc_ts_pi, f"{tech_cat} investment")
 # Batteries private investment is not stationary by KPSS or ADF, to try and remove stationarity from the time series, we can difference the time series.
 
 # %%
-tc_ts_rf_detrended = pd.Series(
-    data=detrend(tc_ts_rf, type="linear", bp=[0, 10]),
-    name=tc_ts_rf.name,
-    index=tc_ts_rf.index,
-)
+tc_ts_rf_diff = tc_ts_rf.diff().dropna()
 tc_ts_pi_diff = tc_ts_pi.diff().dropna()
 
 # %% [markdown]
 # Check again if the time series are stationary:
 
 # %%
-stationarity_adf(tc_ts_rf_detrended, f"{tech_cat} research funding")
-stationarity_kpss(tc_ts_rf_detrended, f"{tech_cat} research funding")
+stationarity_adf(tc_ts_rf_diff, f"{tech_cat} research funding")
+stationarity_kpss(tc_ts_rf_diff, f"{tech_cat} research funding")
 stationarity_adf(tc_ts_pi_diff, f"{tech_cat} investment")
 stationarity_kpss(tc_ts_pi_diff, f"{tech_cat} investment")
 
@@ -191,7 +193,7 @@ stationarity_kpss(tc_ts_pi_diff, f"{tech_cat} investment")
 # Try rerunning the detrending with `bp=[0]` to see that the research funding ADF test still says the time series is not stationary (although much closer to being stationary than before).
 
 # %%
-combine_ts = pd.concat([tc_ts_rf_detrended, tc_ts_pi_diff], axis=1)
+combine_ts = pd.concat([tc_ts_rf_diff, tc_ts_pi_diff], axis=1)
 combine_ts = combine_ts.tail(-1)
 
 # %% [markdown]
@@ -202,7 +204,7 @@ combine_ts = combine_ts.tail(-1)
 
 # %%
 rf_predict_pi = grangercausalitytests(
-    combine_ts[["investment_raised_total", "research_funding_total"]], maxlag=4
+    combine_ts[["investment_raised_total", "research_funding_total"]], maxlag=3
 )
 
 # %% [markdown]
@@ -210,7 +212,7 @@ rf_predict_pi = grangercausalitytests(
 
 # %%
 pi_predict_rf = grangercausalitytests(
-    combine_ts[["research_funding_total", "investment_raised_total"]], maxlag=4
+    combine_ts[["research_funding_total", "investment_raised_total"]], maxlag=3
 )
 
 # %% [markdown]
@@ -218,3 +220,125 @@ pi_predict_rf = grangercausalitytests(
 
 # %% [markdown]
 # At this stage, I don't think we can draw too much from this but this process can be rerun when we have the data at split at smaller time intervals.
+
+# %% [markdown]
+# # PACF
+
+# %%
+
+# %%
+for tech_cat in iss_ts.tech_category.unique():
+    iss_ts_current_tc = iss_ts.query(f"tech_category == '{tech_cat}'")
+    rf = iss_ts_current_tc.research_funding_total.diff().dropna().values
+    pi = iss_ts_current_tc.investment_raised_total.diff().dropna().values
+    stationarity_adf(rf, f"{tech_cat} research funding")
+    stationarity_kpss(rf, f"{tech_cat} research funding")
+    stationarity_adf(pi, f"{tech_cat} investment")
+    stationarity_kpss(pi, f"{tech_cat} investment")
+    sm.graphics.tsa.plot_pacf(
+        rf,
+        lags=6,
+        method="ywm",
+        title=f"Partial Autocorrelation {tech_cat} research funding",
+    )
+    plt.show()
+    sm.graphics.tsa.plot_pacf(
+        pi, lags=6, method="ywm", title=f"Partial Autocorrelation {tech_cat} investment"
+    )
+    plt.show()
+
+# %% [markdown]
+# The PACF show that for all industries except for Wind & offshore there is no
+
+# %%
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+dta = sm.datasets.sunspots.load_pandas().data
+dta.index = pd.Index(sm.tsa.datetools.dates_from_range("1700", "2008"))
+del dta["YEAR"]
+dta.values.squeeze().shape
+
+# %%
+sm.graphics.tsa.plot_pacf(dta.values.squeeze(), lags=40, method="ywm")
+plt.show()
+
+# %%
+
+# %%
+
+# %%
+import pmdarima as pm
+from pmdarima import model_selection
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+import numpy as np
+
+# %%
+tech_cat = "Micro CHP"
+tc_ts = iss_ts[iss_ts.tech_category == tech_cat]
+tc_ts_rf = tc_ts.research_funding_total
+tc_ts_pi = tc_ts.investment_raised_total
+
+# %%
+test_periods = 4
+tc_ts_pi_train = tc_ts_pi.head(-test_periods)
+tc_ts_pi_test = tc_ts_pi.tail(test_periods)
+tc_ts_rf_train = tc_ts_rf.head(-test_periods)
+tc_ts_rf_test = tc_ts_rf.tail(test_periods)
+
+# %%
+modl = pm.auto_arima(
+    tc_ts_pi_train,
+    X=tc_ts_rf_train.values.reshape(-1, 1),
+    max_p=10,
+    max_q=10,
+    max_P=10,
+    max_Q=10,
+    max_d=2,
+    max_D=2,
+    seasonal=False,
+    stepwise=True,
+    suppress_warnings=True,
+    error_action="ignore",
+    trace=True,
+)
+
+# %%
+modl
+
+# %%
+# Create predictions for the future, evaluate on test
+preds, conf_int = modl.predict(
+    n_periods=tc_ts_pi_test.shape[0],
+    # X=tc_ts_rf_test.values.reshape(-1, 1),
+    return_conf_int=True,
+)
+
+# Print the error:
+print("Test RMSE: %.3f" % np.sqrt(mean_squared_error(tc_ts_pi_test, preds)))
+
+# %%
+preds
+
+# %%
+conf_int
+
+# %% [markdown]
+# ARIMA(p, d, q)
+#
+# p: The order of the auto-regressive (AR) model (i.e., the number of lag observations). A time series is considered AR when previous values in the time series are very predictive of later values. An AR process will show a very gradual decrease in the ACF plot.<br>
+# d: The degree of differencing.<br>
+# q: The order of the moving average (MA) model. This is essentially the size of the “window” function over your time series data. An MA process is a linear combination of past errors.
+
+# %% [markdown]
+# ARIMA(0, 1, 0) == Random walk
+
+# %% [markdown]
+# ARIMA(0, 0, 0) == White noise
+
+# %% [markdown]
+# Run for each dataset and see what type of model it produces....
+
+# %%
