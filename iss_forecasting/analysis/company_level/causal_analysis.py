@@ -28,8 +28,7 @@ from iss_forecasting.analysis.company_level.causal_graphs import (
     medium_graph,
     large_graph,
 )
-import pandas as pd
-import numpy as np
+from iss_forecasting.getters.company_success import get_company_future_success_dataset
 from dowhy import CausalModel
 import dowhy.datasets
 import pygraphviz
@@ -45,11 +44,7 @@ CAUSAL_GRAPH_IMG_PATH_SAVE = PROJECT_DIR / "outputs/figures/causal_model"
 CAUSAL_GRAPH_IMG_PATH_LOAD = PROJECT_DIR / "outputs/figures/causal_model.png"
 
 # %%
-data = pd.read_csv(
-    PROJECT_DIR
-    / "inputs/data/company_level/company_data_window_2011-01-01-2019-01-01.csv",
-    index_col=0,
-)
+data = get_company_future_success_dataset()
 
 # %% [markdown]
 # ## Step 1: Create causal graph
