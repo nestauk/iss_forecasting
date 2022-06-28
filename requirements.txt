@@ -12,3 +12,5 @@ statsmodels==0.13.1
 seaborn==0.11.2
 scikit-learn==1.0.2
 pingouin==0.5.0
+lightgbm==3.3.2
+explainerdashboard==0.3.8.2
