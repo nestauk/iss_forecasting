@@ -122,7 +122,7 @@ n_funding_rounds -> {total_investment_amount_gbp,n_unique_investors_total,future
 founder_count -> n_months_before_first_investment;
 n_months_before_first_investment -> future_success;
 last_investment_round_type -> {last_investment_round_gbp,future_success};
-n_months_since_founded -> {total_grant_amount_gbp,last_investment_round_type,total_investment_amount_gbp,n_funding_rounds,future_success};
+n_months_since_founded -> {has_received_ukri_grant, has_received_grant, total_grant_amount_gbp,last_investment_round_type,total_investment_amount_gbp,n_funding_rounds,future_success};
 location_id -> {has_received_grant,n_funding_rounds,total_investment_amount_gbp,n_months_before_first_investment,future_success};
 }"""
 
