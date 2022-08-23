@@ -5,6 +5,8 @@
 - Meet the data science cookiecutter [requirements](http://nestauk.github.io/ds-cookiecutter/quickstart), in brief:
   - Install: `git-crypt`, `direnv`, and `conda`
   - Have a Nesta AWS account configured with `awscli`
+- Run `brew install cmake` to install CMake (needed to install LightGBM)
+- Run `brew install libomp` to install OpenMP (needed to install LightGBM)
 - Run `make install` to configure the development environment:
   - Setup the conda environment
   - Configure pre-commit
