@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.13.6
+#       jupytext_version: 1.14.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -18,6 +18,7 @@
 from iss_forecasting import PROJECT_DIR
 from iss_forecasting.utils.io import load_pickle
 from iss_forecasting.getters.company_success import get_company_future_success_dataset
+from iss_forecasting.getters.crunchbase import get_crunchbase_orgs
 import pandas as pd
 import warnings
 
@@ -87,13 +88,13 @@ for col in cols_to_set_to_neg_one:
 
 # %%
 # Make predictions
-raw_predictions = model.predict(data, raw_score=True)
-predictions = model.predict(data)
+preds_prob = model.predict_proba(data)[:, 1]
+preds_binary = model.predict(data)
 
 # %%
 # Add predictions to data
-data["raw_prediction"] = raw_predictions
-data["prediction"] = predictions
+data["success_pred_prob"] = preds_prob
+data["success_pred_binary"] = preds_binary
 
 # %%
 # Add columns back in
@@ -110,13 +111,42 @@ lirt_data = data.filter(regex="^last_investment_round_type_")
 data = data.drop(columns=loc_data.columns).drop(columns=lirt_data.columns)
 
 # %%
-# Find top 20 most confident success predictions for green companies
-top_20_green = data.query("green_pilot == 1").sort_values(
-    "raw_prediction", ascending=False
-)[0:20]
+# Add useful cols from crunchbase orgs file
+cb_orgs = get_crunchbase_orgs()[
+    [
+        "id",
+        "name",
+        "legal_name",
+        "short_description",
+        "long_description",
+        "founded_on",
+        "location_id",
+        "employee_count",
+        "num_funding_rounds",
+        "total_funding_usd",
+        "homepage_url",
+        "email",
+        "cb_url",
+    ]
+]
+
+predictions = data[
+    ["id", "success_pred_prob", "success_pred_binary", "green_pilot"]
+].merge(right=cb_orgs, on="id")
 
 # %%
-# Save to csv
-top_20_green.to_csv(PROJECT_DIR / "outputs/data/top20green.csv")
+# Save all UK companies
+(
+    predictions.drop(columns="green_pilot")
+    .sort_values("success_pred_prob", ascending=False)
+    .reset_index(drop=True)
+    .to_csv(PROJECT_DIR / "outputs/data/all_uk_companies_success_preds.csv")
+)
 
 # %%
+# Find and save top 20 most confident success predictions for green companies
+(
+    predictions.query("green_pilot == 1")
+    .sort_values("success_pred_prob", ascending=False)[0:20]
+    .to_csv(PROJECT_DIR / "outputs/data/top_20_green_success_preds.csv")
+)
