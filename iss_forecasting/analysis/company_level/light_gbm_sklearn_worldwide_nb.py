@@ -16,7 +16,7 @@
 
 # %%
 import lightgbm as lgb
-from iss_forecasting import PROJECT_DIR
+from iss_forecasting import PROJECT_DIR, logger
 import pandas as pd
 from sklearn.metrics import f1_score
 from sklearn.model_selection import ParameterGrid
@@ -32,76 +32,73 @@ import re
 
 
 # %%
+def drop_cols(cfs_data: pd.DataFrame) -> pd.DataFrame:
+    return cfs_data.drop(
+        columns=[
+            col
+            for col in cfs_data.columns
+            if "grant" in col or "beis" in col or "tech_cat_" in col
+        ]
+        + ["green_pilot", "id", "legal_name", "long_description", "name"]
+    )
+
+
+def make_dummies(cfs_data: pd.DataFrame) -> pd.DataFrame:
+    return pd.get_dummies(
+        cfs_data,
+        columns=["location_id", "last_investment_round_type"],
+        prefix=["loc", "last_investment_round_type"],
+    )
+
+
+def set_names_variable(cfs_data: pd.DataFrame) -> pd.DataFrame:
+    global names
+    names = cfs_data.name
+    return cfs_data
+
+
+def train_valid_split(cfs_data: pd.DataFrame, val_split: float) -> pd.DataFrame:
+    val_size = int(len(cfs_data) * val_split)
+    train_data = cfs_data.head(-val_size)
+    validation_data = cfs_data.tail(val_size)
+    global valid_names
+    valid_names = names.tail(val_size)  # To be used as index in explainer dashboard
+    X_train = train_data.drop(columns=["future_success"])
+    y_train = train_data.future_success
+    X_valid = validation_data.drop(columns=["future_success"])
+    y_valid = validation_data.future_success
+    logger.info(f"Training data mean future success is: {y_train.mean()}")
+    logger.info(f"Validation data mean future success is: {y_valid.mean()}")
+    return X_train, y_train, X_valid, y_valid
+
+
+# %%
 # Load data
-data = get_company_future_success_dataset(test=False, uk_only=False)
-
-# %%
-# Make wordwide columns to drop
-grants_cols = [col for col in data.columns if "grant" in col]
-beis_cols = [col for col in data.columns if "beis" in col]
-tech_cat_cols = [col for col in data.columns if "tech_cat_" in col]
-worldwide_cols_to_drop = grants_cols + beis_cols + tech_cat_cols + ["green_pilot"]
-
-# %%
-# Get names to be used as index in explainer dashboard
-names = data.name
-# Drop cols not used in the model
-data = data.drop(
-    columns=["id", "name", "legal_name", "long_description"] + worldwide_cols_to_drop
+dataset_size = 180_000  # Reduce if having RAM issues
+data = (
+    get_company_future_success_dataset(test=False, uk_only=False)
+    .sample(frac=1, random_state=10)
+    .head(dataset_size)
+    .pipe(set_names_variable)
+    .pipe(drop_cols)
+    .assign(
+        location_id=lambda x: x.location_id.str.replace(
+            "[^A-Za-z0-9_]+", "", regex=True
+        )
+    )
+    .pipe(make_dummies)
 )
 
 # %%
-# Random shuffle data
-data = data.sample(frac=1, random_state=10)
+# Split data
+X_train, y_train, X_valid, y_valid = train_valid_split(data, val_split=0.2)
+del data, names
 
 # %%
-# Cut down size of dataset to reduce RAM
-size = 180_000
-data = data.head(size)
-
-# %%
-# Remove non_alphanumeric
-data.location_id = data.location_id.str.replace("[^A-Za-z0-9_]+", "", regex=True)
-
-# %%
-# Create dummy cols
-data = pd.get_dummies(
-    data,
-    columns=["location_id", "last_investment_round_type"],
-    prefix=["loc", "last_investment_round_type"],
-)
-
-# %%
-# Create train and validation sets
-val_size = int(len(data) * 0.2)
-train_data = data.head(-val_size)
-validation_data = data.tail(val_size)
-
-# %%
-# Get valid names to be used as index in explainer dashboard
-valid_names = names.tail(val_size)
-
-# %%
-# Check datasets have roughly the same amount of future successful companies
-print(
-    data.future_success.mean(),
-    train_data.future_success.mean(),
-    validation_data.future_success.mean(),
-)
-
-# %%
-# Create train and validation datasets
-X_train = train_data.drop(columns=["future_success"])
-y_train = train_data.future_success
-
-X_valid = validation_data.drop(columns=["future_success"])
-y_valid = validation_data.future_success
-
-# %%
-# Delete variables to save RAM
-del data
-del train_data
-del validation_data
+# Create new directory to save model to
+dt = time.strftime("%Hh%Mm%Ss_%Y-%m-%d")
+model_path = PROJECT_DIR / f"outputs/models/light_gbm_{dt}_{dataset_size}"
+model_path.mkdir(parents=True, exist_ok=True)
 
 # %%
 # # Create dict of parameters to search
@@ -171,10 +168,6 @@ del validation_data
 # search_results_df = pd.DataFrame.from_dict(search_results)
 
 # %%
-# Create new directory to save model to
-dt = time.strftime("%Hh%Mm%Ss_%Y-%m-%d")
-model_path = PROJECT_DIR / f"outputs/models/light_gbm_{dt}_{size}"
-model_path.mkdir(parents=True, exist_ok=True)
 
 # %%
 # # Save parameter search results
