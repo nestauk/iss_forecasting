@@ -100,25 +100,33 @@ data = data.loc[:, ~data.columns.duplicated()]
 
 
 # %%
-def add_predictions(data: pd.DataFrame, model) -> pd.DataFrame:
-    pred_prob = model.predict_proba(data)[:, 1]
-    pred_binary = model.predict(data)
-    return data.assign(success_pred_prob=pred_prob, success_pred_binary=pred_binary)
+def add_predictions(company_data: pd.DataFrame, model) -> pd.DataFrame:
+    """Add predictions related columns to the company data"""
+    pred_prob = model.predict_proba(company_data)[:, 1]
+    pred_binary = model.predict(company_data)
+    return company_data.assign(
+        success_pred_prob=pred_prob, success_pred_binary=pred_binary
+    )
 
 
-def drop_dummy_cols(data: pd.DataFrame) -> pd.DataFrame:
-    loc_data = data.filter(regex="^loc_")
-    lirt_data = data.filter(regex="^last_investment_round_type_")
-    return data.drop(columns=loc_data.columns).drop(columns=lirt_data.columns)
+def drop_dummy_cols(company_data: pd.DataFrame) -> pd.DataFrame:
+    """Drop dummy columns relating to location and last_investment_round_type"""
+    loc_data = company_data.filter(regex="^loc_")
+    lirt_data = company_data.filter(regex="^last_investment_round_type_")
+    return company_data.drop(columns=loc_data.columns).drop(columns=lirt_data.columns)
 
 
 def add_info_cols_back(
-    data: pd.DataFrame, cols_to_add_after_predictions: list
+    company_data: pd.DataFrame, cols_to_add_after_predictions: list
 ) -> pd.DataFrame:
-    return pd.concat([data, cols_to_add_after_predictions], axis=1)
+    """Add columns and values that provide information but were
+    not needed for model predictions"""
+    return pd.concat([company_data, cols_to_add_after_predictions], axis=1)
 
 
-def add_cb_cols(data: pd.DataFrame) -> pd.DataFrame:
+def add_cb_cols(company_data: pd.DataFrame) -> pd.DataFrame:
+    """Add informativecolumns from crunchbase organisations file
+    to company success predictions data"""
     cb_orgs = get_crunchbase_orgs()[
         [
             "id",
@@ -136,7 +144,7 @@ def add_cb_cols(data: pd.DataFrame) -> pd.DataFrame:
             "cb_url",
         ]
     ]
-    return data[["id", "success_pred_prob", "success_pred_binary"]].merge(
+    return company_data[["id", "success_pred_prob", "success_pred_binary"]].merge(
         right=cb_orgs, on="id"
     )
 

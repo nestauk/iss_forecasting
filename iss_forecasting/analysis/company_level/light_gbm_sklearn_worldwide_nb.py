@@ -33,6 +33,7 @@ import re
 
 # %%
 def drop_cols(cfs_data: pd.DataFrame) -> pd.DataFrame:
+    """Drop columns not needed in the worldwide prediction model"""
     return cfs_data.drop(
         columns=[
             col
@@ -44,6 +45,7 @@ def drop_cols(cfs_data: pd.DataFrame) -> pd.DataFrame:
 
 
 def make_dummies(cfs_data: pd.DataFrame) -> pd.DataFrame:
+    """Make dummy columns for location_id and last_investment_round_type"""
     return pd.get_dummies(
         cfs_data,
         columns=["location_id", "last_investment_round_type"],
@@ -52,12 +54,24 @@ def make_dummies(cfs_data: pd.DataFrame) -> pd.DataFrame:
 
 
 def set_names_variable(cfs_data: pd.DataFrame) -> pd.DataFrame:
+    """Create global variable for names for the companies"""
     global names
     names = cfs_data.name
     return cfs_data
 
 
 def train_valid_split(cfs_data: pd.DataFrame, val_split: float) -> pd.DataFrame:
+    """Split the training data into X_train, y_train, X_valid, y_valid
+    Also return a global variable for valid_names which can be used as index
+    in the explainder dashboard.
+
+    Args:
+        cfs_data: Company future success dataset
+        val_split: Size of the validation dataset e.g 0.2
+
+    Returns:
+        X_train, y_train, X_valid, y_valid
+    """
     val_size = int(len(cfs_data) * val_split)
     train_data = cfs_data.head(-val_size)
     validation_data = cfs_data.tail(val_size)
