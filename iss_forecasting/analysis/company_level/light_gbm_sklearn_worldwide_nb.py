@@ -245,4 +245,10 @@ plt.title(f"Confusion matrix - validation data. TPR = {tpr}, TNR = {tnr}")
 plt.tight_layout()
 plt.savefig(model_path / "valid_confusion_matrix.jpeg")
 
+# Save X_train, y_train, X_valid, y_valid
+save_pickle(model_path, "datasets", (X_train, y_train, X_valid, y_valid))
+
+# Save valid_names
+save_pickle(model_path, "valid_names", valid_names)
+
 # %%
