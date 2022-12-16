@@ -20,7 +20,7 @@ from iss_forecasting import PROJECT_DIR
 from iss_forecasting.utils.io import load_pickle
 
 # %%
-model_path = PROJECT_DIR / "outputs/models/light_gbm_21h25m19s_2022-04-27"
+model_path = PROJECT_DIR / "outputs/models/light_gbm_10h53m55s_2022-11-21_180000"
 
 # %%
 # Load objects needed for explainer dashboard
@@ -34,7 +34,7 @@ explainer = ClassifierExplainer(
     X_valid,
     y_valid,
     X_background=X_train,
-    cats=["loc", "last_investment_round_type", "group", "tech_cat"],
+    cats=["loc", "last_investment_round_type", "group"],
     labels=["No Future Success", "Future Success"],
     na_fill=-1,
     idxs=valid_names,
@@ -50,4 +50,4 @@ db = ExplainerDashboard(
     decision_trees=False,
     mode="external",
 )
-db.run(port=8052)
+db.run(port=8055)

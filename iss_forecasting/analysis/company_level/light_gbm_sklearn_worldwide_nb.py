@@ -194,11 +194,12 @@ model_path.mkdir(parents=True, exist_ok=True)
 # max_val_f1 = iterations_max_f1.params.values[0]
 # save_pickle(model_path, "max_val_f1", max_val_f1)
 
-# # Save X_train, y_train, X_valid, y_valid
-# save_pickle(model_path, "datasets", (X_train, y_train, X_valid, y_valid))
+# %%
+# Save X_train, y_train, X_valid, y_valid
+save_pickle(model_path, "datasets", (X_train, y_train, X_valid, y_valid))
 
-# # Save valid_names
-# save_pickle(model_path, "valid_names", valid_names)
+# Save valid_names
+save_pickle(model_path, "valid_names", valid_names)
 
 # %%
 # Use this cell if you want to run without doing parameter search
