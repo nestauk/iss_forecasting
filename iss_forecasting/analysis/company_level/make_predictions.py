@@ -31,7 +31,9 @@ model = load_pickle(model_path, "lightgbm_model.pickle")
 
 # %%
 # Load dataset
-data = get_company_future_success_dataset(date_range="2014-01-04-2022-01-04")
+data = get_company_future_success_dataset(
+    date_range="2014-01-04-2022-01-04", test=False, uk_only=True
+)
 
 # %%
 # Process dataset
@@ -56,6 +58,9 @@ dummies = pd.get_dummies(
 data = pd.concat([data, dummies], axis=1).drop(columns=cols_not_used_by_model)
 
 data.columns = data.columns.str.replace("beis_", "")
+
+# %%
+cols_to_add_after_predictions
 
 # %%
 # Load training dataset
