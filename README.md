@@ -1,10 +1,12 @@
 #  :chart_with_upwards_trend: Anticipating trends in impact investing
 
-**_Exploring predictive analytics and causal inference methods_**
+**_Exploring supervised machine learning and causal inference methods to analyse startup success_**
 
 ## :wave: Welcome!
 
-This was an exploratory project led by Nesta's [Discovery Hub](https://www.nesta.org.uk/project/discovery-hub/), to trial methods for anticipating future trends in venture capital investment into startups. We are especially interested in startups working on solutions relevant to Nesta’s missions, for example, green tech, food tech and early years education.
+This was an exploratory project led by Nesta's [Discovery Hub](https://www.nesta.org.uk/project/discovery-hub/), to trial methods for anticipating future trends in venture capital investment into startups. 
+
+The Discovery Hub scans for emerging trends, promising technologies and interventions. We are particularly interested in trends around startups working on solutions relevant to Nesta’s missions, for example, green tech, food tech and early years education.
 
 ### :books: Read the blogs
 We have described the results of this exploration in the following Medium articles:
