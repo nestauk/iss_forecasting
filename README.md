@@ -13,7 +13,7 @@ We have described the results of this exploration in the following Medium articl
 
 
 ### :floppy_disk: Datasets
-The input dataset unfortunately contains proprietary data from the Crunchbase database, which is why it can't be shared openly. However,the [Gateway to Research](https://gtr.ukri.org/) and [BEIS/Nesta R&D spatial data](https://access-research-development-spatial-data.beis.gov.uk/) are openly accessible.
+The input dataset unfortunately contains proprietary data from the Crunchbase database, which is why it can't be shared openly. However, the [Gateway to Research](https://gtr.ukri.org/) and [BEIS/Nesta R&D spatial data](https://access-research-development-spatial-data.beis.gov.uk/) are openly accessible.
 
 You can also [see here the scripts](https://github.com/nestauk/innovation_sweet_spots/tree/dev/innovation_sweet_spots/pipeline/pilot/investment_predictions) used for joining up the three datasets, and preparing them for the prediction model and causal inference.
 
